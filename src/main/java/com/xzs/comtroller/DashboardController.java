@@ -94,7 +94,7 @@ public class DashboardController {//主页
 
             index.setDoQuestionCount(String.valueOf(90));
             List<String> list2 = new ArrayList<>();
-            list2.add("999");
+            list2.add("990");
             index.setMothDayUserActionValue(list2);
             index.setMothDayDoExamQuestionValue(list2);
             index.setMothDayText(list2);
