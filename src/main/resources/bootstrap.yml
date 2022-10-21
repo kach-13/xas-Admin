@@ -1,0 +1,21 @@
+spring:
+  application:
+    name: applicatiom
+  # nacos config
+  cloud:
+    nacos:
+      config:
+        server-addr: 192.168.58.1:8848
+        # 配置文件后缀名为yaml
+        file-extension: yaml
+      discovery:
+        server-addr: 192.168.58.1:8848
+
+#Nacos配置文件读取配置
+#config:
+ # server-addr: 192.168.58.1:8848
+  #file-extension: yaml
+  #prefix: nacos
+  #discovery:
+  #  server-addr: 192.168.58.1:8848
+
