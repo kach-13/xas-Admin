@@ -73,11 +73,12 @@ public class DashboardController {//主页
         for(int i = 0 ; i < cookies.length ; i ++){
             if(cookies[i].getName().equals("UserID")){//判断登录状态
                 user =  (TUser) redisTemplate.opsForValue().get(cookies[i].getValue());
-                if( null == user){
-                    return RestResponse.fail(401,"登录超时");
-                }
+
                 break;
             }
+        }
+        if( user.getId() == null){
+            return RestResponse.fail(401,"登录超时");
         }
         //TUser tUser = JSONObject.parseObject(cookies[0].getValue(), TUser.class);
 
@@ -519,6 +520,51 @@ public class DashboardController {//主页
             SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
             tUserEventLog.setCreateTime(simpleDateFormat.format(new Date()));
             tUserEventLogMapper.insertSelective(tUserEventLog);
+            return RestResponse.ok();
+        }
+        return RestResponse.fail(501,"删除失败");
+    }
+    @PostMapping("/education/subject/page")
+    public RestResponse subjectPage (@RequestBody Pager pager){
+        tSubjectExample.clear();
+        TSubjectExample.Criteria criteria = tSubjectExample.createCriteria();
+        if(pager.getLevel() != null){
+            criteria.andLevelEqualTo(pager.getLevel());
+        }
+        List<TSubject> tSubjects = tSubjectMapper.selectByExample(tSubjectExample);
+        //RowBounds rowBounds = new RowBounds((pager.getPageIndex()-1)*pager.getPageSize(),pager.getPageSize());
+       // List<TSubject> list = tSubjectMapper.selectByExampleWithRowbounds(tSubjectExample, rowBounds);
+        SubjectList subjectList = new SubjectList();
+        if(tSubjects.size()!= 0){
+           // subjectList.setTotall(tSubjects.size());
+            subjectList.setList(tSubjects);
+            return RestResponse.ok(subjectList);
+        }
+        return RestResponse.fail(501,"无数据");
+    }
+    @PostMapping("/education/subject/select/{id}")
+    public RestResponse SelectSubject (@PathVariable("id") Integer id){
+        TSubject tSubject = tSubjectMapper.selectByPrimaryKey(id);
+        return RestResponse.ok(tSubject);
+    }
+    @PostMapping("/education/subject/edit")
+    public RestResponse UpdataSubject(@RequestBody TSubject tSubject){
+        int i = 0 ;
+        if(tSubject.getId() == null){//ID为·null表示新增
+            i = tSubjectMapper.insertSelective(tSubject);
+        }else{
+             i = tSubjectMapper.updateByPrimaryKeySelective(tSubject);
+        }
+        if(i == 1 ){
+            return RestResponse.ok();
+        }
+        return RestResponse.fail(501,"更新失败");
+    }
+
+    @PostMapping("education/subject/delete/{id}")
+    public RestResponse deleteSubject(@PathVariable("id")Integer id){
+        int i = tSubjectMapper.deleteByPrimaryKey(id);
+        if(i == 1 ){
             return RestResponse.ok();
         }
         return RestResponse.fail(501,"删除失败");
