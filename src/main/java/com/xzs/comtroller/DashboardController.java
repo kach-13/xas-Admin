@@ -58,6 +58,10 @@ public class DashboardController {//主页
     private TexamPaperAnswerExample texamPaperAnswerExample = new TexamPaperAnswerExample();
     @Autowired
     private TexamPaperAnswerMapper texamPaperAnswerMapper;
+
+    private TmessageExample tmessageExample = new TmessageExample();
+    @Autowired
+    private TmessageMapper tmessageMapper;
     @Autowired
     private RedisTemplate redisTemplate ;
     @Value(value = "${all.number:}")
@@ -568,5 +572,9 @@ public class DashboardController {//主页
             return RestResponse.ok();
         }
         return RestResponse.fail(501,"删除失败");
+    }
+    @PostMapping("/message/page")
+    public RestResponse message(@RequestBody Pager pager){
+
     }
 }
