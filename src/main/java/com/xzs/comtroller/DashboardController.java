@@ -573,8 +573,79 @@ public class DashboardController {//主页
         }
         return RestResponse.fail(501,"删除失败");
     }
+    private TMessageUserExample tMessageUserExample = new TMessageUserExample();
+    @Autowired
+    private TMessageUserMapper tMessageUserMapper;
     @PostMapping("/message/page")
     public RestResponse message(@RequestBody Pager pager){
-
+        tmessageExample.clear();
+        TmessageExample.Criteria criteria = tmessageExample.createCriteria();
+        RowBounds rowBounds = new RowBounds(( pager.getPageIndex() - 1 ) * pager.getPageSize(), pager.getPageSize());
+        if(pager.getSendUserName() != null){
+            criteria.andSendUserNameEqualTo(pager.getSendUserName());
+        }
+        List<Tmessage> count = tmessageMapper.selectByExample(tmessageExample);
+        List<Tmessage> tmessages = tmessageMapper.selectByExampleWithRowbounds(tmessageExample, rowBounds);
+        tMessageUserExample.clear();
+        String sname = "";//获取接收人名字，可能有多个
+        if(tmessages.size() != 0){
+            for(int i = 0 ; i < tmessages.size() ; i ++){
+                tMessageUserExample.createCriteria().andMessageIdEqualTo(tmessages.get(i).getId());
+                List<TMessageUser> tMessageUsers = tMessageUserMapper.selectByExample(tMessageUserExample);
+                for(int j = 0 ; j < tMessageUsers.size() ; j ++ ){
+                   sname = sname + "," + tMessageUsers.get(j).getReceiveUserName();
+                }
+                tmessages.get(i).setReceives(sname);
+                sname = "";//每轮循环结束清空内容
+                tMessageUserExample.clear();
+            }
+            Messign messign = new Messign();
+            messign.setList(tmessages);
+            messign.setPageNum(pager.getPageIndex());
+            messign.setTotall(count.size());
+            return RestResponse.ok(messign);
+        }
+        return null;
+    }
+    @PostMapping("/user/selectByUserName")
+    public RestResponse MessGetUserName(@RequestBody String name){
+        tUserExample.clear();
+        tUserExample.createCriteria().andUserNameLike("%"+name+"%");
+        List<TUser> tUsers = tUserMapper.selectByExample(tUserExample);
+        List<String> response = new ArrayList<>();
+        return RestResponse.ok(tUsers);
+    }
+    @PostMapping("/message/send")//发送消息
+    public RestResponse messagesend(@RequestBody Pager pager , HttpServletRequest request){
+        TUser admin = (TUser) request.getSession().getAttribute("admin");
+        List<Integer> idlist = pager.getReceiveUserIds();
+        if(admin != null){
+            Tmessage tmessage = new Tmessage();
+            tmessage.setCreateTime(new Date());
+            tmessage.setTitle(pager.getTitle());
+            tmessage.setContent(pager.getContent());
+            tmessage.setSendUserId(admin.getId());
+            tmessage.setSendUserName(admin.getUserName());
+            tmessage.setSendRealName(admin.getRealName());
+            int i = tmessageMapper.insertSelective(tmessage);
+            if(i != 1){
+                return RestResponse.fail(501,"发送失败");
+            }
+            for(int j = 0 ; j < idlist.size() ; j ++){
+                TMessageUser tMessageUser = new TMessageUser();
+                tMessageUser.setCreateTime(new Date());
+                tMessageUser.setMessageId(tmessage.getId());
+                TUser tUser = tUserMapper.selectByPrimaryKey(idlist.get(j));
+                tMessageUser.setReceiveRealName(tUser.getRealName());
+                tMessageUser.setReceiveUserName(tUser.getUserName());
+                tMessageUser.setReceiveUserId(tUser.getId());
+                int i1 = tMessageUserMapper.insertSelective(tMessageUser);
+                if(i1 != 1){
+                    return RestResponse.fail(501,"发送失败");
+                }
+            }
+            return RestResponse.ok();
+        }
+        return RestResponse.fail(401,"未登录");
     }
 }

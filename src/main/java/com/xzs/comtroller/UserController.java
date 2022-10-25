@@ -47,7 +47,7 @@ private TUserEventLogMapper tUserEventLogMapper;
             if(tUsers.get(0).getStatus() == 2){
                 return  RestResponse.fail(400,"当前账号被禁用");
             }
-
+            session.setAttribute("admin",tUsers.get(0));
             Cookie cookie = new Cookie("UserID", tUsers.get(0).getId().toString());
             cookie.setMaxAge(3600);
             cookie.setPath("/");
@@ -74,6 +74,7 @@ private TUserEventLogMapper tUserEventLogMapper;
     @PostMapping(value = "logout")//退出登录
     public RestResponse<TUser> logOut (HttpSession session, HttpServletResponse response, HttpServletRequest request){
         Cookie[] cookies = request.getCookies();
+        session.setAttribute("admin",null);
         for(int i = 0 ; i < cookies.length ; i ++){
             if(cookies[i].getName().equals("UserID")){//判断登录状态
                 redisTemplate.delete(cookies[i].getValue());
