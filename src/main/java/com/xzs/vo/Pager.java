@@ -2,6 +2,8 @@ package com.xzs.vo;
 
 import lombok.Data;
 
+import java.util.List;
+
 @Data
 public class Pager {//分页实体类
    private Integer pageIndex;
@@ -9,8 +11,46 @@ public class Pager {//分页实体类
    private Integer role;
    private String userName;
    private Integer userId;
+   private String sendUserName;
 
-   private Integer id; //试卷Id
+    public List<Integer> getReceiveUserIds() {
+        return receiveUserIds;
+    }
+
+    public void setReceiveUserIds(List<Integer> receiveUserIds) {
+        this.receiveUserIds = receiveUserIds;
+    }
+
+    private String content;
+   private String title;
+   private List<Integer> receiveUserIds;
+
+    public String getContent() {
+        return content;
+    }
+
+    public void setContent(String content) {
+        this.content = content;
+    }
+
+    public String getTitle() {
+        return title;
+    }
+
+    public void setTitle(String title) {
+        this.title = title;
+    }
+
+
+    public String getSendUserName() {
+        return sendUserName;
+    }
+
+    public void setSendUserName(String sendUserName) {
+        this.sendUserName = sendUserName;
+    }
+
+    private Integer id; //试卷Id
    private Integer subjectId;
 
    private Integer gradeLevel;
